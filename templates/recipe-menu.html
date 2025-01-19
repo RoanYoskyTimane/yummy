@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #step { margin: 10px 0; }
+    </style>
+    
+</head>
+<body>
+    <h2>Add Recipe:</h2>
+
+    <form>
+        {{ form.imageOfTheRecipe(id="imageOfTheRecipe") }}
+        <br><br>
+        {{form.nameOfTheRecipe.label}}
+        {{form.nameOfTheRecipe(id="nameOfTheRecipe")}}
+
+        <br><br>
+
+        {{form.country.label}}
+        {{form.country(id="country")}}
+
+        <br><br>
+        
+        {{form.teacher.label}}
+        {{form.teacher(id="teacher")}}
+
+        <br><br>
+
+        <div id="ingredients">
+            <label for="">Quantity</label>
+            <input type="text" id="quantity">
+
+            {{form.measurement.label}}
+            {{form.measurement(id="measurement")}}
+
+            <label for="">Ingredient</label>
+            <input type="text" id="ingredient">
+
+            <button type="button" onclick="handleMeasurementFunction()">Add ingredient</button>
+
+            <div id="ingredients_measure_list">
+
+            </div>
+        </div>
+
+        {{form.step.label}}
+        {{form.step(id="step")}}
+        <br>
+        <div id="all_steps">
+
+        </div>
+        <br>
+        <button type="button" onclick="handleRecipeFunction()">Add step</button>     
+        <br><br>
+        <button type="submit" onclick="submitData()">Submit The Recipe</button>
+        <script src="../static/script.js"></script>
+    </form>
+</body>
+</html>
