@@ -1,56 +1,102 @@
-from flask import Flask, render_template, flash, request, jsonify
-import traceback
+from flask import Flask, render_template, request
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField, SelectField, FileField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, EqualTo
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
+import cloudinary
+import cloudinary.uploader
+#from cloudinary.utils import cloudinary_url
+from flask_migrate import Migrate
+
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///recipe.db"
 app.config['SECRET_KEY'] = "1214"
+app.config['UPLOAD_FOLDER'] = 'static/files'
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 
 class Recipe(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    photoOfTheRecipe = db.Column(db.LargeBinary)
+    photoOfTheRecipe = db.Column(db.String(200))
     nameOfTheRecipe = db.Column(db.String(200))
     country = db.Column(db.String(25))
     teacher = db.Column(db.String(10))
-    steps = db.Column()
-    
+    ingredient = db.Column(db.String(200))
+    steps = db.Column(db.String(1000))
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(320))
+    password = db.Column(db.String(200))
+
+    @property
+    def password(self):
+        raise AttributeError ('password is not readable attribute!')
+
+    @password.setter
+    def password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)   
+
+
+def init_db():
+    with app.app_context():
+        db.create_all()
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()  # Creates the database and tables
     app.run(debug=True)
 
+cloudinary.config( 
+    cloud_name = "dyyt08ixh", 
+    api_key = "324699569726994", 
+    api_secret = "MClHB7NDLNWGeeFi4RzF1QRmfng", 
+    secure=True
+)
 
 @app.route('/')
 
 def index():
     return render_template("index.html")
 
-
-class LoginForm(FlaskForm):
+class SigninForm(FlaskForm):
     email = StringField("Email", validators=[DataRequired()])
-    password = PasswordField("Password", validators=[DataRequired()])
-    submit = SubmitField("Login")
+    password = PasswordField("Password", validators=[DataRequired(), EqualTo('password_hash2', message='Password must be equal')])
+    confirm_password = PasswordField("Confirm Password", validators=[DataRequired()])
+    submit = SubmitField("Sign-in")
 
+@app.route('/signin', methods=['GET', 'POST'])
 
-@app.route('/login', methods=['GET', 'POST'])
+def signin():
+    form = SigninForm()
 
-def login():
-    form = LoginForm()
+    return render_template ("signin.html", form=form)
 
-    if form.validate_on_submit():
-        # Handle form submission
-        pass
+@app.route('/add_user', methods=['POST'])
 
-    return render_template ("login.html", form=form)
+def add_user():
+    email = request.form['email']
+    password = request.form['password']
+    confirm_password = request.form['confirm_password']
+    hashed_password = ""
+
+    if (password != confirm_password):
+        print("The password don't match are different")
+        return render_template("signin.html")
+    else:
+        print("This is the email", email)
+        print("This the password", password)
+        print("This the confirm password", confirm_password)
+        hashed_password = generate_password_hash(password, method="pbkdf2:sha256")
+        print("The hashed password", hashed_password)
+        return render_template("index.html")
 
 class RecipeForm(FlaskForm):
-    imageOfTheRecipe = FileField("Upload a photo")
+    #imageOfTheRecipe = FileField("Upload a photo")
     nameOfTheRecipe = StringField("Recipe name:", validators=[DataRequired()])
     country = SelectField("Country", choices=[
         ('Mozambique'),
@@ -76,7 +122,7 @@ class RecipeForm(FlaskForm):
     ])
 
     step = StringField("Steps")
-    
+
 @app.route('/add_recipe')
 
 def recipe():
@@ -87,29 +133,31 @@ def recipe():
 @app.route('/submit', methods=['POST'])
 
 def submit_recipe():
-    if not request.is_json:
-            return jsonify({
-                'status': 'error',
-                'message': 'Content-Type must be application/json'
-            }), 400
-        
-    data = request.get_json()
+    file = request.files['imageOfTheRecipe']
+    image_url = ""
 
-    nameOfTheRecipe = data.get('nameOfTheRecipe')
+    if file:
+        upload_result = cloudinary.uploader.upload(file)
+        image_url = upload_result.get('url')
+        print("The url of the image", image_url)    
+        print('File successfully uploaded')
+    
+    nameOfTheRecipe = request.form['nameOfTheRecipe']
     print("The name of the recipe",nameOfTheRecipe)
-    country = data.get('country')
-    print("The name of the country",country)
-    teacher = data.get('teacher')
+    
+    country = request.form['country']
+    print("The name of the country", country)
+
+    teacher = request.form['teacher']
     print("The name of the teacher",teacher)
-    ingredient = data.get('ingredient')
+
+    ingredient = request.form['allIngredients']
     print("The ingredients", ingredient)
-    recipe = data.get('recipe')
-    print("The recipe", recipe)
 
-    response_message = f"The name of the recipe: {nameOfTheRecipe}, country:{country}, teacher: {teacher}, ingredient: {ingredient}, recipe: {recipe}"     
-    return jsonify({"message": response_message}), 200
+    steps = request.form['theFinalRecipe']
+    print("The recipe", steps)
     
-    
-
-    
-        
+    recipe = Recipe(photoOfTheRecipe=image_url, nameOfTheRecipe=nameOfTheRecipe, country=country, teacher=teacher, ingredient=ingredient, steps=steps)
+    db.session.add(recipe)
+    db.session.commit()
+    return render_template("success.html")

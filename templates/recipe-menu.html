@@ -12,8 +12,8 @@
 <body>
     <h2>Add Recipe:</h2>
 
-    <form>
-        {{ form.imageOfTheRecipe(id="imageOfTheRecipe") }}
+    <form action="/submit" method="post" enctype="multipart/form-data">
+        <input type="file" name="imageOfTheRecipe" id="imageOfTheRecipe" name="imageOfTheRecipe">
         <br><br>
         {{form.nameOfTheRecipe.label}}
         {{form.nameOfTheRecipe(id="nameOfTheRecipe")}}
@@ -56,6 +56,8 @@
         <br>
         <button type="button" onclick="handleRecipeFunction()">Add step</button>     
         <br><br>
+        <input type="hidden" id="theFinalRecipe" name="theFinalRecipe">
+        <input type="hidden" id="allIngredients" name="allIngredients">
         <button type="submit" onclick="submitData()">Submit The Recipe</button>
         <script src="../static/script.js"></script>
     </form>

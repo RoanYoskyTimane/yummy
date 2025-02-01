@@ -8,10 +8,10 @@
 <body>
     <section id="login">
         <div>
-            <form method="POST">
-                {{ form.csrf_token }} 
+            <form action="/add_user" method="POST" enctype="multipart/form-data">
+                
         
-                <h2>Login</h2>
+                <h2>Sign-in</h2>
                 {{ form.email.label }}
                 {{ form.email}}
         
@@ -19,7 +19,11 @@
                 
                 {{ form.password.label}}
                 {{ form.password}}
+
                 <br>
+
+                {{form.confirm_password.label}}
+                {{form.confirm_password}}
                 {{ form.submit}}
             </form>
         </div>

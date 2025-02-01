@@ -38,6 +38,8 @@ function makeRecipe()
         the_step = allSteps[count-1];
         full_recipe = full_recipe + "\n" + the_step;
     }
+
+    document.getElementById("theFinalRecipe").value = full_recipe;
 }
 
 function handleRecipeFunction() 
@@ -80,6 +82,8 @@ function makeMeasurementList()
         the_step = all_measurement[countMeasurement-1];
         full_details = full_details + "\n" + the_step;
     }
+
+    document.getElementById("allIngredients").value = full_details;
 }
 
 function handleMeasurementFunction() 
@@ -88,46 +92,45 @@ function handleMeasurementFunction()
     makeMeasurementList();
 }
 
-function submitData() 
-{ 
-    const nameOfTheRecipe = document.getElementById('nameOfTheRecipe').value; 
-    const country = document.getElementById('country').value;
-    const teacher = document.getElementById('teacher').value;
-    const ingredient = measurement_recipe;
-    const recipe = full_recipe;
+// function submitData() 
+// {
+//     const nameOfTheRecipe = document.getElementById('nameOfTheRecipe').value; 
+//     const country = document.getElementById('country').value;
+//     const teacher = document.getElementById('teacher').value;
+//     const ingredient = measurement_recipe;
+//     const recipe = full_recipe;
     
+//     const data = {
+//         nameOfTheRecipe: nameOfTheRecipe,
+//         country: country,
+//         teacher: teacher,
+//         ingredient: ingredient,
+//         recipe: recipe
+//     };
 
-    const data = {
-        nameOfTheRecipe: nameOfTheRecipe,
-        country: country,
-        teacher: teacher,
-        ingredient: ingredient,
-        recipe: recipe
-    };
-
-    fetch('/submit', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-    })
-    .then(response => {
-            // Check if the response is OK (status 200-299)
-            if (response.ok) {
-                return response.json(); // Parse JSON if the response is OK
-            }
-            // Handle error responses
-            return response.json().then(err => {
-                throw new Error(err.message || 'Unknown error occurred');
-            });
-        })
-    .then(data => {
-            console.log('Success:', data);
-            alert('Data submitted successfully!');
-        })
-    .catch(error => {
-            console.error('Error:', error.message);
-            alert(`An error occurred: ${error.message}`);
-        });
-}
+//     fetch('/submit', {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify(data),
+//     })
+//     .then(response => {
+//             // Check if the response is OK (status 200-299)
+//             if (response.ok) {
+//                 return response.json(); // Parse JSON if the response is OK
+//             }
+//             // Handle error responses
+//             return response.json().then(err => {
+//                 throw new Error(err.message || 'Unknown error occurred');
+//             });
+//         })
+//     .then(data => {
+//             console.log('Success:', data);
+//             alert('Data submitted successfully!');
+//         })
+//     .catch(error => {
+//             console.error('Error:', error.message);
+//             alert(`An error occurred: ${error.message}`);
+//         });
+// }
